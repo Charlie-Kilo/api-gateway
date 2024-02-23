@@ -1,0 +1,11 @@
+C:\Users\DanteClark\rust-git\api_gateway\api_gateway\target\release\deps\libsocket2-d72fc0915e51ef45.rmeta: C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\lib.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\sockaddr.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\socket.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\sockref.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\sys\windows.rs
+
+C:\Users\DanteClark\rust-git\api_gateway\api_gateway\target\release\deps\libsocket2-d72fc0915e51ef45.rlib: C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\lib.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\sockaddr.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\socket.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\sockref.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\sys\windows.rs
+
+C:\Users\DanteClark\rust-git\api_gateway\api_gateway\target\release\deps\socket2-d72fc0915e51ef45.d: C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\lib.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\sockaddr.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\socket.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\sockref.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\sys\windows.rs
+
+C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\lib.rs:
+C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\sockaddr.rs:
+C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\socket.rs:
+C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\sockref.rs:
+C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\socket2-0.5.5\src\sys\windows.rs:
