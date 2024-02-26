@@ -14,6 +14,12 @@ struct ImageMetadata {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+struct Imagepath {
+    final_image_path: String,
+}
+
+
+#[derive(Debug, Deserialize, Serialize)]
 struct ImageUrl {
     url: String,
 }
@@ -67,9 +73,12 @@ async fn send_to_write_to_dynamo(metadata: ImageMetadata) -> Result<(), MyError>
     Ok(())
 }
 
-async fn return_file_path_handler(metadata: ImageMetadata) -> Result<impl Reply, Rejection> {
+async fn return_file_path_handler(image_path: Imagepath) -> Result<impl Reply, Rejection> {
     // Here you can add your logic for handling the POST request in your existing API gateway
-    println!("Handling request in existing API gateway: {:?}", metadata);
+    println!("Handling request in existing API gateway: {:?}", image_path);
+    let response_body = serde_json::json!({
+        "final_image_path": image_path.final_image_path
+    });
     Ok(warp::reply::html("Handled by existing API gateway"))
 }
 
