@@ -58,7 +58,7 @@ async fn send_to_write_to_dynamo(metadata: ImageMetadata) -> Result<(), MyError>
     // Make an HTTP POST request to the write-to-dynamo service
     let client = reqwest::Client::new();
     client
-        .post("http://localhost:3030/upload") // Change the URI to match your write-to-dynamo service endpoint
+        .post("http://localhost:3033/upload") // Change the URI to match your write-to-dynamo service endpoint
         .body(json_data)
         .send()
         .await
@@ -83,8 +83,36 @@ async fn post_url_handler(image_url: ImageUrl) -> Result<impl Reply, Rejection> 
     let url = image_url.url;
     // Here you can add your logic for handling the URL, such as saving the image or processing it
     println!("Received URL: {}", url);
-    // For demonstration purposes, returning a success message
-    Ok(warp::reply::html("URL received successfully"))
+    
+    // Send the URL to the save image service
+    match send_to_save_image_service(url).await {
+        Ok(message) => Ok(warp::reply::html(message)),
+        Err(err) => Err(warp::reject::custom(MyError {
+            message: format!("Error sending URL to save image service: {}", err),
+        })),
+    }
+}
+
+async fn send_to_save_image_service(url: String) -> Result<String, Box<dyn Error>> {
+    // Serialize the URL payload to JSON
+    let json_data = serde_json::to_string(&ImageUrl { url: url.clone() })
+        .map_err(|e| format!("Serialization error: {}", e))?;
+
+    // Make an HTTP POST request to the other service
+    let client = reqwest::Client::new();
+    let response = client
+        .post("http://localhost:3032/url")
+        .body(json_data)
+        .send()
+        .await
+        .map_err(|e| format!("HTTP request error: {}", e))?;
+
+    // Check if the request was successful
+    if response.status().is_success() {
+        Ok("URL sent successfully".to_string())
+    } else {
+        Err("Failed to send URL".to_string().into())
+    }
 }
 
 #[tokio::main]
