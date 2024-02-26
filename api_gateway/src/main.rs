@@ -1,5 +1,5 @@
 use std::{error::Error, fmt};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use warp::{Filter, Rejection, Reply};
 
 #[derive(Debug, serde::Deserialize, Serialize)]
@@ -11,6 +11,11 @@ struct ImageMetadata {
     final_image_key: String,
     label: String,
     type_: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+struct ImageUrl {
+    url: String,
 }
 
 #[derive(Debug)]
@@ -62,16 +67,44 @@ async fn send_to_write_to_dynamo(metadata: ImageMetadata) -> Result<(), MyError>
     Ok(())
 }
 
+async fn return_file_path_handler(metadata: ImageMetadata) -> Result<impl Reply, Rejection> {
+    // Here you can add your logic for handling the POST request in your existing API gateway
+    println!("Handling request in existing API gateway: {:?}", metadata);
+    Ok(warp::reply::html("Handled by existing API gateway"))
+}
+
+async fn post_url_handler(image_url: ImageUrl) -> Result<impl Reply, Rejection> {
+    // Extract the URL from the JSON payload
+    let url = image_url.url;
+    // Here you can add your logic for handling the URL, such as saving the image or processing it
+    println!("Received URL: {}", url);
+    // For demonstration purposes, returning a success message
+    Ok(warp::reply::html("URL received successfully"))
+}
+
 #[tokio::main]
 async fn main() {
-    // Define the API endpoint route
-    let api_route = warp::post()
-        .and(warp::path("upload"))
+    // Define the API endpoint routes
+    let write_to_dynamo = warp::post()
+        .and(warp::path("dynamo"))
         .and(warp::body::json())
         .and_then(handle_request);
 
+    let return_file_path = warp::post()
+        .and(warp::path("path"))
+        .and(warp::body::json())
+        .and_then(return_file_path_handler);
+
+    let post_url = warp::post()
+        .and(warp::path("url"))
+        .and(warp::body::json())
+        .and_then(post_url_handler);
+
+    // Combine all routes
+    let routes = write_to_dynamo.or(return_file_path).or(post_url);
+
     // Start the warp server
-    warp::serve(api_route)
+    warp::serve(routes)
         .run(([127, 0, 0, 1], 3031)) // Change the port if needed
         .await;
 }
