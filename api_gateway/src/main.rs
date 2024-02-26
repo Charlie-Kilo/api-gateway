@@ -18,7 +18,6 @@ struct Imagepath {
     final_image_path: String,
 }
 
-
 #[derive(Debug, Deserialize, Serialize)]
 struct ImageUrl {
     url: String,
@@ -36,9 +35,7 @@ impl fmt::Display for MyError {
 }
 
 impl Error for MyError {}
-
 impl warp::reject::Reject for MyError {}
-
 async fn handle_request(metadata: ImageMetadata) -> Result<impl Reply, Rejection> {
     // Here you would insert your logic to handle the incoming metadata
     println!("Received metadata: {:?}", metadata);
@@ -58,7 +55,6 @@ async fn send_to_write_to_dynamo(metadata: ImageMetadata) -> Result<(), MyError>
         .map_err(|e| MyError {
             message: format!("Serialization error: {}", e),
         })?;
-
     // Make an HTTP POST request to the write-to-dynamo service
     let client = reqwest::Client::new();
     client
@@ -112,8 +108,15 @@ async fn main() {
     // Combine all routes
     let routes = write_to_dynamo.or(return_file_path).or(post_url);
 
-    // Start the warp server
-    warp::serve(routes)
-        .run(([127, 0, 0, 1], 3031)) // Change the port if needed
-        .await;
+   // Apply CORS globally to all routes
+   let cors = warp::cors()
+    .allow_any_origin() // Allow requests from any origin
+    .allow_methods(vec!["GET", "POST", "PUT", "DELETE"]) // Allow specific HTTP methods
+    .allow_headers(vec!["Content-Type"]); // Allow specific headers
+   let routes_with_cors = routes.with(cors);
+
+   // Start the warp server
+   warp::serve(routes_with_cors)
+       .run(([127, 0, 0, 1], 3031))
+       .await;
 }
