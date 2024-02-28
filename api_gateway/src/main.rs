@@ -1,6 +1,7 @@
+use tokio::time::{Duration, timeout};
 use std::{error::Error, fmt};
 use serde::{Deserialize, Serialize};
-use warp::{http::header, Filter, Rejection, Reply};
+use warp::{Filter, Rejection, Reply};
 
 #[derive(Debug, Deserialize, Serialize)]
 struct ImageMetadata {
@@ -11,12 +12,6 @@ struct ImageMetadata {
     final_image_key: String,
     label: String,
     type_: String,
-    requestId: String, // Add requestId field
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-struct Imagepath {
-    final_image_path: String,
     requestId: String, // Add requestId field
 }
 
@@ -86,16 +81,15 @@ async fn post_url_handler(image_url: ImageUrl) -> Result<impl Reply, Rejection> 
 
     // Send the URL to the save image service
     match send_to_save_image_service(url, requestId.clone()).await {
-        Ok((message, final_image_path)) => {
+        Ok(message) => {
             // Construct a success response object
             let response_body = serde_json::json!({
                 "message": message,
-                "final_image_path": final_image_path,
                 "requestId": requestId,
             });
 
             // Debugging: Print out the response body before returning
-            dbg!(&response_body);
+            println!("test response {}", &response_body);
 
             // Serialize the response object to JSON and return it as the response
             Ok(warp::reply::json(&response_body))
@@ -110,30 +104,41 @@ async fn post_url_handler(image_url: ImageUrl) -> Result<impl Reply, Rejection> 
 }
 
 
-async fn send_to_save_image_service(url: String, requestId: String) -> Result<(String, String), Box<dyn Error>> {
+
+async fn send_to_save_image_service(url: String, requestId: String) -> Result<String, Box<dyn Error>> {
     // Serialize the URL payload to JSON
     let json_data = serde_json::to_string(&ImageUrl { url: url.clone(), requestId: requestId.clone() })
         .map_err(|e| format!("Serialization error: {}", e))?;
 
-    // Make an HTTP POST request to the other service
+    // Make an HTTP POST request to the save image service
     let client = reqwest::Client::new();
-    let response = client
-        .post("http://localhost:3032/url")
-        .body(json_data)
-        .header("requestId", requestId) // Include requestId in the header
-        .send()
-        .await
-        .map_err(|e| format!("HTTP request error: {}", e))?;
+    // Define the timeout duration (adjust as needed)
+    let timeout_duration = Duration::from_secs(30);
+    // Perform the HTTP request with a timeout
+    let response = timeout(timeout_duration, async {
+        client
+            .post("http://localhost:3032/url")
+            .body(json_data)
+            .header("requestId", requestId) // Include requestId in the header
+            .send()
+            .await
+            .map_err(|e| format!("HTTP request error: {}", e))
+    }).await;
 
     // Check if the request was successful
-    if response.status().is_success() {
-        // Extract the URL from the response body
-        let response_body: String = response.text().await?;
-        let response_body: serde_json::Value = serde_json::from_str(&response_body)?;
-        let returned_url = response_body["url"].as_str().unwrap_or("");
-        Ok(("URL sent successfully".to_string(), returned_url.to_string()))
-    } else {
-        Err("Failed to send URL".to_string().into())
+    match response {
+        Ok(Ok(response)) => {
+            // Check if the request was successful
+            if response.status().is_success() {
+                // Extract the URL from the response body
+                let response_body: String = response.text().await?;
+                Ok("URL sent successfully".to_string())
+            } else {
+                Err("Failed to send URL".to_string().into())
+            }
+        },
+        Ok(Err(e)) => Err(format!("HTTP request error: {}", e).into()), // Handle HTTP request error
+        Err(_) => Err("Request timed out".to_string().into()), // Handle request timeout
     }
 }
 
@@ -158,18 +163,18 @@ async fn main() {
     // Apply CORS globally to all routes
     use warp::http::header;
 
-    // Inside the main function before starting the server
     let cors = warp::cors()
-    .allow_any_origin() // Allow requests from any origin
-    .allow_methods(vec!["GET", "POST", "PUT", "DELETE"]) // Allow specific HTTP methods
+    .allow_any_origin()
+    .allow_methods(vec!["GET", "POST", "PUT", "DELETE"])
     .allow_headers(vec![
         "Content-Type",
-        "Authorization", // Add headers needed by your frontend
+        "Authorization",
     ]); 
-    let routes_with_cors = routes.with(cors);
-    
-    // Start the warp server
-    warp::serve(routes_with_cors)
-        .run(([127, 0, 0, 1], 3031))
-        .await;    
+
+let routes_with_cors = routes.with(cors);
+
+// Start the warp server
+warp::serve(routes_with_cors)
+    .run(([127, 0, 0, 1], 3031))
+    .await;    
 }

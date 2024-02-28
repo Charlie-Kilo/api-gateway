@@ -1,0 +1,10 @@
+C:\Users\DanteClark\source\repos\api-gateway\api_gateway\target\debug\deps\libenv_filter-81fdd1e78c31946c.rmeta: C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\env_filter-0.1.0\src\lib.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\env_filter-0.1.0\src\directive.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\env_filter-0.1.0\src\filter.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\env_filter-0.1.0\src\filtered_log.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\env_filter-0.1.0\src\op.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\env_filter-0.1.0\src\parser.rs
+
+C:\Users\DanteClark\source\repos\api-gateway\api_gateway\target\debug\deps\env_filter-81fdd1e78c31946c.d: C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\env_filter-0.1.0\src\lib.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\env_filter-0.1.0\src\directive.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\env_filter-0.1.0\src\filter.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\env_filter-0.1.0\src\filtered_log.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\env_filter-0.1.0\src\op.rs C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\env_filter-0.1.0\src\parser.rs
+
+C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\env_filter-0.1.0\src\lib.rs:
+C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\env_filter-0.1.0\src\directive.rs:
+C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\env_filter-0.1.0\src\filter.rs:
+C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\env_filter-0.1.0\src\filtered_log.rs:
+C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\env_filter-0.1.0\src\op.rs:
+C:\Users\DanteClark\.cargo\registry\src\index.crates.io-6f17d22bba15001f\env_filter-0.1.0\src\parser.rs:
