@@ -77,33 +77,40 @@ async fn send_to_write_to_dynamo(metadata: ImageMetadata, requestId: String) -> 
     Ok(())
 }
 
-async fn return_file_path_handler(image_path: Imagepath) -> Result<impl Reply, Rejection> {
-    // Extract requestId from the incoming image_path
-    let requestId = image_path.requestId.clone();
-    println!("Handling request in existing API gateway: {:?}", image_path);
-    let response_body = serde_json::json!({
-        "final_image_path": image_path.final_image_path
-    });
-    Ok(warp::reply::html("Handled by existing API gateway"))
-}
 
 async fn post_url_handler(image_url: ImageUrl) -> Result<impl Reply, Rejection> {
-    // Extract the URL from the JSON payload
+    // Extract the URL and requestId from the JSON payload
     let url = image_url.url;
-    let requestId = image_url.requestId.clone(); // Extract requestId from the incoming image_url
+    let requestId = image_url.requestId.clone();
     println!("Received URL: {} Received Id: {}", url, requestId);
-    
+
     // Send the URL to the save image service
     match send_to_save_image_service(url, requestId.clone()).await {
-        Ok(message) => Ok(warp::reply::html(message)),
-        Err(err) => Err(warp::reject::custom(MyError {
-            message: format!("Error sending URL to save image service: {}", err),
-        })),
+        Ok((message, final_image_path)) => {
+            // Construct a success response object
+            let response_body = serde_json::json!({
+                "message": message,
+                "final_image_path": final_image_path,
+                "requestId": requestId,
+            });
+
+            // Debugging: Print out the response body before returning
+            dbg!(&response_body);
+
+            // Serialize the response object to JSON and return it as the response
+            Ok(warp::reply::json(&response_body))
+        },
+        Err(err) => {
+            // Return an error response if sending the URL failed
+            Err(warp::reject::custom(MyError {
+                message: format!("Error sending URL to save image service: {}", err),
+            }))
+        }
     }
 }
 
-// Modify the function signature to accept `requestId` parameter
-async fn send_to_save_image_service(url: String, requestId: String) -> Result<String, Box<dyn Error>> {
+
+async fn send_to_save_image_service(url: String, requestId: String) -> Result<(String, String), Box<dyn Error>> {
     // Serialize the URL payload to JSON
     let json_data = serde_json::to_string(&ImageUrl { url: url.clone(), requestId: requestId.clone() })
         .map_err(|e| format!("Serialization error: {}", e))?;
@@ -120,7 +127,11 @@ async fn send_to_save_image_service(url: String, requestId: String) -> Result<St
 
     // Check if the request was successful
     if response.status().is_success() {
-        Ok("URL sent successfully".to_string())
+        // Extract the URL from the response body
+        let response_body: String = response.text().await?;
+        let response_body: serde_json::Value = serde_json::from_str(&response_body)?;
+        let returned_url = response_body["url"].as_str().unwrap_or("");
+        Ok(("URL sent successfully".to_string(), returned_url.to_string()))
     } else {
         Err("Failed to send URL".to_string().into())
     }
@@ -135,10 +146,6 @@ async fn main() {
         .and(warp::body::json())
         .and_then(handle_request);
 
-    let return_file_path = warp::post()
-        .and(warp::path("path"))
-        .and(warp::body::json())
-        .and_then(return_file_path_handler);
 
     let post_url = warp::post()
         .and(warp::path("url"))
@@ -146,16 +153,19 @@ async fn main() {
         .and_then(post_url_handler);
 
     // Combine all routes
-    let routes = write_to_dynamo.or(return_file_path).or(post_url);
+    let routes = write_to_dynamo.or(post_url);
 
     // Apply CORS globally to all routes
     use warp::http::header;
 
     // Inside the main function before starting the server
     let cors = warp::cors()
-        .allow_any_origin() // Allow requests from any origin
-        .allow_methods(vec!["GET", "POST", "PUT", "DELETE"]) // Allow specific HTTP methods
-        .allow_headers(vec!["Content-Type"]); // Allow specific headers
+    .allow_any_origin() // Allow requests from any origin
+    .allow_methods(vec!["GET", "POST", "PUT", "DELETE"]) // Allow specific HTTP methods
+    .allow_headers(vec![
+        "Content-Type",
+        "Authorization", // Add headers needed by your frontend
+    ]); 
     let routes_with_cors = routes.with(cors);
     
     // Start the warp server
